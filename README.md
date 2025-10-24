@@ -1,62 +1,46 @@
-# shipHero
+graph LR
+  API[ShipHero Public GraphQL API<br/>https://public-api.shiphero.com/graphql]
+  AUTH[/auth/token → Bearer JWT/]
+  WEBHOOKS[Webhooks: Inventory Update, Shipment Update, Order Update, Inventory Snapshot]
+  COMPLEXITY[Complexity & Quotas: query complexity, credits, analyze:true]
+  DOCS[Docs & Examples: schema, examples, mutations, queries]
+  Account[Account]
+  Products[Products (products, product_create, product_update)]
+  Orders[Orders (order(s), create_order, fulfillment)]
+  Shipments[Shipments (shipments, create_shipment)]
+  Returns[Returns (return_create)]
+  Inventory[Inventory (inventory_sync, snapshot, warehouse_products)]
+  PurchaseOrders[Purchase Orders]
+  Vendors[Vendors]
+  Warehouses[Warehouses]
+  WebhookMgmt[Webhook Management (register, unregister, list, verify)]
+  Pagination[Pagination: connections (edges → node), args: first,last,filters]
 
+  API --> AUTH
+  API --> DOCS
+  API --> COMPLEXITY
+  API --> WEBHOOKS
+  API --> Account
+  API --> Products
+  API --> Orders
+  API --> Shipments
+  API --> Returns
+  API --> Inventory
+  API --> PurchaseOrders
+  API --> Vendors
+  API --> Warehouses
+  API --> WebhookMgmt
+  API --> Pagination
 
-digraph ShipHeroAPI {
-  rankdir=LR;
-  node [shape=record, fontname="Helvetica"];
+  Orders --> Shipments
+  Orders --> Returns
+  Products --> Inventory
+  Warehouses --> Inventory
+  PurchaseOrders --> Vendors
+  Inventory --> Snapshot[Inventory Snapshot (async export)]
+  WebhookMgmt --> WEBHOOKS
 
-  API [label="{ShipHero Public GraphQL API|endpoint: https://public-api.shiphero.com/graphql}"];
-  AUTH [label="{Authentication|/auth/token -> Bearer JWT}"];
-  WEBHOOKS [label="{Webhooks|Inventory Update, Shipment Update, Order Update, Inventory Snapshot}"];
-  COMPLEXITY [label="{Complexity & Quotas|query complexity, credits, analyze:true}"];
-  DOCS [label="{Docs & Examples|schema, examples, mutations, queries}"];
-
-  Account [label="{Account}"];
-  Products [label="{Products|queries: products, product_create, product_update}"];
-  Orders [label="{Orders|queries: order(s), create_order, order_fulfillment}"];
-  Shipments [label="{Shipments|queries: shipments, create_shipment}"];
-  Returns [label="{Returns|return_create}"];
-  Inventory [label="{Inventory|inventory_sync, inventory_snapshot, warehouse_products}"];
-  PurchaseOrders [label="{PurchaseOrders|purchase_orders, create_purchase_order}"];
-  Vendors [label="{Vendors}"];
-  Warehouses [label="{Warehouses}"];
-  WebhookManagement [label="{Webhook Management|register, unregister, list, verify}"];
-  Pagination [label="{Pagination Patterns|connections: edges -> node, args: first,last,filters}"];
-
-  API -> AUTH;
-  API -> DOCS;
-  API -> COMPLEXITY;
-  API -> WEBHOOKS [label="complements"];
-  API -> Account;
-  API -> Products;
-  API -> Orders;
-  API -> Shipments;
-  API -> Returns;
-  API -> Inventory;
-  API -> PurchaseOrders;
-  API -> Vendors;
-  API -> Warehouses;
-  API -> WebhookManagement;
-  API -> Pagination;
-
-  Orders -> Shipments [label="has/creates"];
-  Orders -> Returns [label="may link to"];
-  Products -> Inventory [label="stock levels / warehouse_products"];
-  Warehouses -> Inventory [label="holds products"];
-  PurchaseOrders -> Vendors [label="ordered from"];
-  Inventory -> "Inventory Snapshot" [label="export (async)"];
-  "Inventory Snapshot" [shape=note];
-  WebhookManagement -> WEBHOOKS;
-
-  COMPLEXITY -> Pagination [label="encourage limits"];
-  COMPLEXITY -> "Analyze Mode" [label="analyze:true"];
-  "Analyze Mode" [shape=note];
-
-  subgraph cluster_client {
-    label="Client / Integration";
-    color=blue;
-    ClientApp [label="Client (Python/JS)"];
-    ClientApp -> API [label="POST {query, variables} + Authorization header"];
-    ClientApp -> WEBHOOKS [style=dashed, label="register callback"];
-  }
-}
+  COMPLEXITY --> Pagination
+  COMPLEXITY --> Analyze[Analyze Mode (analyze:true)]
+  Client[Client (Python/JS)] -->|POST {query,variables} + Authorization| API
+  Client -->|register callback| WEBHOOKS
