@@ -1,0 +1,129 @@
+type Retailer {
+  id: Int!
+  name: String!
+  edi_identifier: String!
+  contact_email: String
+  contact_phone: String
+  is_active: Boolean!
+  created_at: String!
+  updated_at: String!
+}
+
+type Product {
+  id: Int!
+  sku: String!
+  upc: String
+  name: String!
+  description: String
+  price: Float!
+  cost: Float!
+  quantity_on_hand: Int!
+  quantity_reserved: Int!
+  quantity_available: Int!
+  is_active: Boolean!
+  created_at: String!
+  updated_at: String!
+}
+
+type Order {
+  id: Int!
+  order_number: String!
+  retailer: Retailer
+  status: String!
+  order_date: String!
+  ship_by_date: String
+  ship_to_name: String
+  ship_to_address1: String
+  ship_to_address2: String
+  ship_to_city: String
+  ship_to_state: String
+  ship_to_zip: String
+  ship_to_country: String
+  ship_to_phone: String
+  subtotal: Float!
+  tax_amount: Float!
+  shipping_amount: Float!
+  total_amount: Float!
+  notes: String
+  created_at: String!
+  updated_at: String!
+  order_lines: [OrderLine!]!
+  shipments: [Shipment!]!
+}
+
+type OrderLine {
+  id: Int!
+  order_id: Int!
+  product: Product
+  quantity_ordered: Int!
+  quantity_shipped: Int!
+  unit_price: Float!
+  line_total: Float!
+  created_at: String!
+  updated_at: String!
+}
+
+type Shipment {
+  id: Int!
+  order_id: Int!
+  shipment_number: String!
+  carrier: String
+  tracking_number: String
+  service_level: String
+  status: String!
+  shipped_date: String
+  delivered_date: String
+  notes: String
+  created_at: String!
+  updated_at: String!
+}
+
+type InventoryAdjustment {
+  id: Int!
+  product_id: Int!
+  product: Product
+  adjustment_type: String!
+  quantity_change: Int!
+  previous_quantity: Int!
+  new_quantity: Int!
+  reason: String
+  reference_number: String
+  created_at: String!
+  created_by: String
+}
+
+type Query {
+  orders(status: String, retailer_id: Int, limit: Int, offset: Int): [Order!]!
+  order(id: Int!): Order
+  products(sku: String, is_active: Boolean, limit: Int, offset: Int): [Product!]!
+  product(id: Int!): Product
+  retailer(id: Int!): Retailer
+  retailers(is_active: Boolean): [Retailer!]!
+  shipments(order_id: Int, status: String): [Shipment!]!
+  inventoryAdjustments(product_id: Int, adjustment_type: String): [InventoryAdjustment!]!
+}
+
+type Mutation {
+  updateInventory(product_id: Int!, quantity_change: Int!, adjustment_type: String!, reason: String, created_by: String): UpdateInventoryResult!
+  updateOrderStatus(order_id: Int!, status: String!): UpdateOrderStatusResult!
+  createProduct(sku: String!, name: String!, price: Float, cost: Float, quantity_on_hand: Int): Product!
+  createRetailer(name: String!, edi_identifier: String!, contact_email: String, contact_phone: String): Retailer!
+}
+
+type UpdateInventoryResult {
+  success: Boolean!
+  message: String!
+  product: Product
+  adjustment: InventoryAdjustment
+}
+
+type UpdateOrderStatusResult {
+  success: Boolean!
+  message: String!
+  order: Order
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
