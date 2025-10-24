@@ -33,7 +33,16 @@ def sample_retailer(app):
         )
         db.session.add(retailer)
         db.session.commit()
-        return retailer
+        retailer_id = retailer.id
+        db.session.expunge(retailer)
+    
+    # Return the ID so tests can fetch fresh instance
+    class RetailerProxy:
+        def __init__(self, id):
+            self.id = id
+            self.edi_identifier = 'TEST001'
+    
+    return RetailerProxy(retailer_id)
 
 
 @pytest.fixture
@@ -53,7 +62,17 @@ def sample_product(app):
         )
         db.session.add(product)
         db.session.commit()
-        return product
+        product_id = product.id
+        product_sku = product.sku
+        db.session.expunge(product)
+    
+    # Return a proxy with essential attributes
+    class ProductProxy:
+        def __init__(self, id, sku):
+            self.id = id
+            self.sku = sku
+    
+    return ProductProxy(product_id, product_sku)
 
 
 @pytest.fixture
@@ -84,4 +103,14 @@ def sample_order(app, sample_retailer, sample_product):
         )
         db.session.add(order_line)
         db.session.commit()
-        return order
+        order_id = order.id
+        order_number = order.order_number
+        db.session.expunge_all()
+    
+    # Return a proxy
+    class OrderProxy:
+        def __init__(self, id, order_number):
+            self.id = id
+            self.order_number = order_number
+    
+    return OrderProxy(order_id, order_number)

@@ -36,7 +36,7 @@ def test_get_product(client, sample_product):
     assert response.status_code == 200
     data = response.get_json()
     assert data['sku'] == sample_product.sku
-    assert data['name'] == sample_product.name
+    assert data['name'] == 'Test Product'
 
 
 def test_update_product(client, sample_product):
